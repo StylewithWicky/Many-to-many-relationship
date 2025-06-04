@@ -14,13 +14,13 @@ class Author(Base):
     __tablename__='authors'
     id =Column(Integer,primary_key=True)
     name=Column(String)
-    books=relationship('Books',secondary=author_book,back_populates='author')
+    books=relationship('Books',secondary=author_book,back_populates='authors')
 
 class Books(Base):
     __tablename__='books'
-    id= Column(Integer,primary_key='True')
+    id= Column(Integer,primary_key=True)
     title=Column(String)
-    author=relationship('Author', secondary=author_book,back_populates='books')
+    authors=relationship('Author', secondary=author_book,back_populates='books')
 
 #Here i am setting the data base
 engine=create_engine('sqlite:///memory')
@@ -40,9 +40,9 @@ with Session() as session:
     book3=Books(title="The Shining")
 
     # Associate them
-    author1.books.append(book1)     # J.K. Rowling wrote Harry Potter
-    author2.books.append(book2)     # Stephen King wrote The Shining
-    author1.books.append(book3)     # Both wrote Co-Written Fantasy
+    author1.books.append(book1)     #
+    author2.books.append(book2)     
+    author1.books.append(book3)     
     author2.books.append(book3)
 
     session.add_all([author1,author2,author3,book1,book2,book3])
