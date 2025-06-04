@@ -1,36 +1,38 @@
 from sqlalchemy import create_engine,Column,Integer,String,ForeignKey,Table
 from sqlalchemy.orm import declarative_base,relationship,sessionmaker
 
-Base=declarative_base
+Base=declarative_base()
 
 #Assaciation table 
 author_book= Table(
     'author_book',Base.metadata,
     Column('author_id',ForeignKey('authors.id') ,primary_key=True),
-    Column('book_id', ForeignKey('book.id') ,primary_key=True)
+    Column('book_id', ForeignKey('books.id') ,primary_key=True)
 )
 
-class Authors(Base):
+class Author(Base):
     __tablename__='authors'
     id =Column(Integer,primary_key=True)
     name=Column(String)
+    books=relationship('Books',secondary=author_book,back_populates='author')
 
 class Books(Base):
     __tablename__='books'
     id= Column(Integer,primary_key='True')
     title=Column(String)
+    author=relationship('Author', secondary=author_book,back_populates='books')
 
 #Here i am setting the data base
-engine=create_engine
+engine=create_engine('sqlite:///memory')
 Base.metadata.create_all(engine)
 Session=sessionmaker(bind=engine)
 session=Session()
 
-with Session(engine) as session:
+with Session() as session:
     #Created the authors
-    author1=Authors(name='Yazz')
-    author2=Authors(name='Is Very')
-    author3=Authors(name='Calm')
+    author1=Author(name='Yazz')
+    author2=Author(name='Is Very')
+    author3=Author(name='Calm')
 
     #Creating books
     book1=Books(title="Harry Potter and the Philosopher's Stone")
@@ -43,7 +45,10 @@ with Session(engine) as session:
     author1.books.append(book3)     # Both wrote Co-Written Fantasy
     author2.books.append(book3)
 
-    session.add_all(author1,author2,author3,book1,book2,book3)
+    session.add_all([author1,author2,author3,book1,book2,book3])
     session.commit()
 
-
+for author in session.query(Author).all():
+    print(f"\n {author.name} wrote :")
+    for book in author.books:
+        print(f" - {book.title}")
